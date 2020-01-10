@@ -2,130 +2,186 @@
 <html>
 
 
-  <head>
+<head>
     <meta charset="utf-8">
     <title>My first three.js app</title>
     <style>
-      body {
-        margin: 0;
-      }
+        body {
+            margin: 0;
+        }
 
-      canvas {
-        width: 100%;
-        height: 100%
-      }
-
+        canvas {
+            width: 100%;
+            height: 100%
+        }
     </style>
-  </head>
+</head>
 
-  <body>
+<body>
     <div id="container"></div>
     <script src="js/three.js"></script>
     <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/loaders/GLTFLoader.js"></script>
     <script>
-      // NEW models
-      //var loader = new THREE.GLTFLoader();
+        // NEW models
+        //var loader = new THREE.GLTFLoader();
 
-      // loader.load('models/square.glb', function (gltf) {
-      //     console.log("add scene")
-      //     scene.add(gltf.scene);
-      //
-      // }, undefined, function (error) {
-      //
-      //     console.error(error);
-      //
-      // });
+        // loader.load('models/square.glb', function (gltf) {
+        //     console.log("add scene")
+        //     scene.add(gltf.scene);
+        //
+        // }, undefined, function (error) {
+        //
+        //     console.error(error);
+        //
+        // });
 
-      var SCREEN_WIDTH = window.innerWidth
-      var SCREEN_HEIGHT = window.innerHeight
+        var SCREEN_WIDTH = window.innerWidth
+        var SCREEN_HEIGHT = window.innerHeight
 
-      var scene = new THREE.Scene()
-      var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 3000)
-      var clock = new THREE.Clock()
-      var renderer = new THREE.WebGLRenderer()
+        var scene = new THREE.Scene()
+        var camera = new THREE.PerspectiveCamera(55, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 3000)
+        var clock = new THREE.Clock()
+        var renderer = new THREE.WebGLRenderer()
 
-      var sunLight = new THREE.DirectionalLight('rgb(255,255,255)', 1)
-      var groundMesh
-      var normalVector = new THREE.Vector3(0, 1, 0)
-      var planeConstant = 0.01 // this value must be slightly higher than the groundMesh's y position of 0.0
-      var groundPlane = new THREE.Plane(normalVector, planeConstant)
-      var lightPosition4D = new THREE.Vector4()
-      var verticalAngle = 0
-      var horizontalAngle = 0
-      var frameTime = 0
-      var TWO_PI = Math.PI * 2
+        var sunLight = new THREE.DirectionalLight('rgb(255,255,255)', 1)
+        var groundMesh
+        var normalVector = new THREE.Vector3(0, 1, 0)
+        var planeConstant = 0.01 // this value must be slightly higher than the groundMesh's y position of 0.0
+        var groundPlane = new THREE.Plane(normalVector, planeConstant)
+        var lightPosition4D = new THREE.Vector4()
+        var verticalAngle = 0
+        var horizontalAngle = 0
+        var frameTime = 0
+        var TWO_PI = Math.PI * 2
+        var cube
 
-      init()
-      animate()
+        init()
+        animate()
 
-      function init() {
+        function init() {
 
-        scene.background = new THREE.Color(0x0096ff)
+            scene.background = new THREE.Color(0x0096ff)
 
-        renderer.setPixelRatio(window.devicePixelRatio)
-        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT)
-        document.getElementById('container').appendChild(renderer.domElement)
-        window.addEventListener('resize', onWindowResize, false)
+            renderer.setPixelRatio(window.devicePixelRatio)
+            renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT)
+            document.getElementById('container').appendChild(renderer.domElement)
+            window.addEventListener('resize', onWindowResize, false)
 
-        camera.position.set(0, 2.5, 10)
-        scene.add(camera)
-        onWindowResize()
+            camera.position.set(0, 2.5, 10)
+            scene.add(camera)
+            onWindowResize()
 
-        sunLight.position.set(5, 7, -1)
-        sunLight.lookAt(scene.position)
-        scene.add(sunLight)
+            sunLight.position.set(5, 7, -1)
+            sunLight.lookAt(scene.position)
+            scene.add(sunLight)
 
-        lightPosition4D.x = sunLight.position.x
-        lightPosition4D.y = sunLight.position.y
-        lightPosition4D.z = sunLight.position.z
-        // amount of light-ray divergence. Ranging from:
-        // 0.001 = sunlight(min divergence) to 1.0 = pointlight(max divergence)
-        lightPosition4D.w = 0.001 // must be slightly greater than 0, due to 0 causing matrixInverse errors
+            lightPosition4D.x = sunLight.position.x
+            lightPosition4D.y = sunLight.position.y
+            lightPosition4D.z = sunLight.position.z
+            // amount of light-ray divergence. Ranging from:
+            // 0.001 = sunlight(min divergence) to 1.0 = pointlight(max divergence)
+            lightPosition4D.w = 0.001 // must be slightly greater than 0, due to 0 causing matrixInverse errors
 
-        // LIGHTBULB
-        var lightSphereGeometry = new THREE.SphereBufferGeometry(0.09)
-        var lightSphereMaterial = new THREE.MeshBasicMaterial({ color: 'rgb(255,255,255)' })
-        lightSphere = new THREE.Mesh(lightSphereGeometry, lightSphereMaterial)
-        scene.add(lightSphere)
-        lightSphere.visible = false
+            // LIGHTBULB
+            var lightSphereGeometry = new THREE.SphereBufferGeometry(0.09)
+            var lightSphereMaterial = new THREE.MeshBasicMaterial({ color: 'rgb(255,255,255)' })
+            lightSphere = new THREE.Mesh(lightSphereGeometry, lightSphereMaterial)
+            scene.add(lightSphere)
+            lightSphere.visible = false
 
-        var lightHolderGeometry = new THREE.CylinderBufferGeometry(0.05, 0.05, 0.13)
-        var lightHolderMaterial = new THREE.MeshBasicMaterial({ color: 'rgb(75,75,75)' })
-        lightHolder = new THREE.Mesh(lightHolderGeometry, lightHolderMaterial)
-        scene.add(lightHolder)
-        lightHolder.visible = false
+            var lightHolderGeometry = new THREE.CylinderBufferGeometry(0.05, 0.05, 0.13)
+            var lightHolderMaterial = new THREE.MeshBasicMaterial({ color: 'rgb(75,75,75)' })
+            lightHolder = new THREE.Mesh(lightHolderGeometry, lightHolderMaterial)
+            scene.add(lightHolder)
+            lightHolder.visible = false
 
-        // GROUND
-        var groundGeometry = new THREE.BoxBufferGeometry(30, 0.01, 40)
-        var groundMaterial = new THREE.MeshLambertMaterial({ color: 'rgb(0,130,0)' })
-        groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
-        groundMesh.position.y = 0.0 //this value must be slightly lower than the planeConstant (0.01) parameter above
-        scene.add(groundMesh)
+            // GROUND
+            var groundGeometry = new THREE.BoxBufferGeometry(30, 0.01, 40)
+            var groundMaterial = new THREE.MeshLambertMaterial({ color: 'rgb(0,130,0)' })
+            groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
+            groundMesh.position.y = 0.0 //this value must be slightly lower than the planeConstant (0.01) parameter above
+            scene.add(groundMesh)
 
-      }
+            //CUBE
+            /*
+            var loader = new THREE.GLTFLoader();
+            loader.load('models/square.glb', function (gltf) {
+                scene.add(gltf.scene);
+                gltf.position.y = 100
+            }, undefined, function (error) {
+                console.error(error);
+            });*/
+            var cubeGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
+            var cubeMaterial = new THREE.MeshLambertMaterial({ color: 'rgb(255,0,0)', emissive: 0x200000 });
+            cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+            cube.position.z = - 1;
+            cube.position.y = 1
+            scene.add(cube);
 
-      function animate() {
+            document.onkeydown = checkKey;
 
-        requestAnimationFrame(animate)
 
-        frameTime = clock.getDelta()
-        renderer.render(scene, camera)
+        }
 
-      }
+        function move(direction) {
+            if (direction == "front") {
+                cube.position.z += 1
+            }
+            else if (direction == "back") {
+                cube.position.z -= 1
+            }
+            else if (direction == "left") {
+                cube.position.x -= 1
+            }
+            else if (direction == "right") {
+                cube.position.x += 1
+            }
+        }
 
-      function onWindowResize() {
+        function checkKey(e) {
 
-        SCREEN_WIDTH = window.innerWidth
-        SCREEN_HEIGHT = window.innerHeight
+            e = e || window.event;
 
-        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT)
+            if (e.keyCode == '38') {
+                move("back")
+            }
+            else if (e.keyCode == '40') {
+                // down arrow
+                move("front")
+            }
+            else if (e.keyCode == '37') {
+                // left arrow$
+                move("left")
+            }
+            else if (e.keyCode == '39') {
+                // right arrow
+                move("right")
+            }
+            animate()
+        }
 
-        camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT
-        camera.updateProjectionMatrix()
+        function animate() {
 
-      }
+            requestAnimationFrame(animate)
+
+            frameTime = clock.getDelta()
+            renderer.render(scene, camera)
+
+        }
+
+        function onWindowResize() {
+
+            SCREEN_WIDTH = window.innerWidth
+            SCREEN_HEIGHT = window.innerHeight
+
+            renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+            camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT
+            camera.updateProjectionMatrix()
+
+        }
 
     </script>
-  </body>
+</body>
 
 </html>
